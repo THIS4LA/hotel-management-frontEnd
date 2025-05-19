@@ -10,13 +10,13 @@ import {
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 
-import Booking from "./booking.jsx";
-import Category from "./category.jsx";
-import Feedback from "./feedback.jsx";
-import Gallery from "./gallery.jsx";
-import Item from "./item.jsx";
-import Room from "./room.jsx";
-import User from "./user.jsx";
+import Booking from "./adminBooking.jsx";
+import Category from "./adminCategory.jsx";
+import Feedback from "./adminFeedback.jsx";
+import Gallery from "./adminGallery.jsx";
+import Item from "./adminItem.jsx";
+import Room from "./adminRoom.jsx";
+import User from "./adminUser.jsx";
 
 export default function Dashboard() {
   const menuItems = [
