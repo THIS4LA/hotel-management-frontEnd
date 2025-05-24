@@ -113,7 +113,6 @@ export default function Booking() {
             </tr>
           ))}
         </tbody>
-        {/* More rows can be added here */}
       </table>
     </div>
   );
