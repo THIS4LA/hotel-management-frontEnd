@@ -7,11 +7,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes path="/">
-        <Route path="/client/*" element={<Home />} />
+        <Route path="/user/*" element={<Home />} />
         <Route path="/admin/*" element={<Dashboard />} />
-        <Route path="/*" element={<Login />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
-    </BrowserRouter>
+    </BrowserRouter>  
   );
 }
 
