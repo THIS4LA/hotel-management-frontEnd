@@ -1,32 +1,25 @@
-import { Route, Routes, Link } from "react-router-dom";
+import { Route, Routes, Link, NavLink } from "react-router-dom";
 import {
   FaClipboardList,
   FaUsers,
   FaImages,
   FaBoxOpen,
   FaCommentDots,
-  FaLayerGroup,
   FaHotel,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 
 import Booking from "./adminBooking.jsx";
-import Category from "./adminCategory.jsx";
-import Feedback from "./adminFeedback.jsx";
 import Gallery from "./adminGallery.jsx";
-import Item from "./adminItem.jsx";
 import Room from "./adminRoom.jsx";
 import User from "./adminUser.jsx";
 
 export default function Dashboard() {
   const menuItems = [
     { icon: <FaClipboardList />, label: "Bookings", path: "/admin/bookings" },
-    { icon: <FaLayerGroup />, label: "Categories", path: "/admin/categories" },
     { icon: <FaHotel />, label: "Rooms", path: "/admin/rooms" },
     { icon: <FaUsers />, label: "Users", path: "/admin/users" },
-    { icon: <FaCommentDots />, label: "Feedback", path: "/admin/feedback" },
-    { icon: <FaImages />, label: "Gallery", path: "/admin/gallery" },
-    { icon: <FaBoxOpen />, label: "Items", path: "/admin/items" },
+    { icon: <FaImages />, label: "Gallery", path: "/admin/gallery" }
   ];
 
   return (
@@ -41,28 +34,31 @@ export default function Dashboard() {
         {/* Navigation Items */}
         <div className="w-full flex flex-col gap-2 px-4">
           {menuItems.map((item, index) => (
-            <Link
+            <NavLink
               key={index}
-              to={item.path} // Use relative paths here
-              className="flex items-center gap-5 w-full pl-10 pr-4 py-4 rounded-md border border-transparent hover:bg-[#E0F4FE] hover:text-[#009DDC] hover:border-[#009DDC] transition-colors"
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center gap-5 w-full pl-10 pr-4 py-4 rounded-md border ${
+                  isActive
+                    ? "bg-[#E0F4FE] text-[#009DDC] border-[#009DDC]"
+                    : "border-transparent text-[#6D6D6D]"
+                } hover:bg-[#E0F4FE] hover:text-[#009DDC] hover:border-[#009DDC] transition-colors`
+              }
             >
               {item.icon}
               {item.label}
-            </Link>
+            </NavLink>
           ))}
         </div>
       </div>
 
       {/* Content Area */}
       <div className="w-[80%] h-screen bg-[#F8F9FA] p-6 overflow-y-scroll">
-        <Routes path="/*">
+        <Routes>
           <Route path="/bookings" element={<Booking />} />
-          <Route path="/categories" element={<Category />} />
           <Route path="/rooms" element={<Room />} />
           <Route path="/users" element={<User />} />
-          <Route path="/feedback" element={<Feedback />} />
           <Route path="/gallery" element={<Gallery />} />
-          <Route path="/items" element={<Item />} />
         </Routes>
       </div>
     </div>
