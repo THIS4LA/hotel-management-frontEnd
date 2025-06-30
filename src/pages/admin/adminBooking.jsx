@@ -1,57 +1,40 @@
-const bookings = [
-  {
-    bookingId: "B001",
-    roomId: "R101",
-    email: "john@example.com",
-    status: "Confirmed",
-    reason: "Vacation",
-    checkInDate: "2025-06-10",
-    checkOutDate: "2025-06-15",
-    note: "Needs extra pillows",
-  },
-  {
-    bookingId: "B002",
-    roomId: "R102",
-    email: "sara@example.com",
-    status: "Pending",
-    reason: "Business Trip",
-    checkInDate: "2025-06-12",
-    checkOutDate: "2025-06-14",
-    note: "Late check-in",
-  },
-  {
-    bookingId: "B003",
-    roomId: "R103",
-    email: "dave@example.com",
-    status: "Cancelled",
-    reason: "Change of plans",
-    checkInDate: "2025-06-15",
-    checkOutDate: "2025-06-20",
-    note: "N/A",
-  },
-  {
-    bookingId: "B004",
-    roomId: "R104",
-    email: "emma@example.com",
-    status: "Confirmed",
-    reason: "Family visit",
-    checkInDate: "2025-06-18",
-    checkOutDate: "2025-06-22",
-    note: "Vegetarian meals requested",
-  },
-  {
-    bookingId: "B005",
-    roomId: "R105",
-    email: "leo@example.com",
-    status: "Confirmed",
-    reason: "Conference",
-    checkInDate: "2025-06-19",
-    checkOutDate: "2025-06-21",
-    note: "Room near elevator",
-  },
-];
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 export default function Booking() {
+  const [bookings, setBookings] = useState([]);
+  const [categoryIsLoaded, setCategoryIsLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!categoryIsLoaded) {
+      axios
+        .get(import.meta.env.VITE_BACKEND_URL + "/api/book/")
+        .then((res) => {
+          setBookings(res.data.bookings);
+          setCategoryIsLoaded(true);
+        })
+        .catch((err) => {
+          console.error("Error fetching bookings:", err);
+        });
+    }
+  }, [categoryIsLoaded]);
+
+  async function deleteItem(bookingId) {
+  const confirmDelete = window.confirm("Are you sure you want to delete this booking?");
+  
+  if (!confirmDelete) return; // Stop if user cancels
+
+  try {
+    await axios.delete(
+      import.meta.env.VITE_BACKEND_URL + "/api/book/" + bookingId
+    );
+    setCategoryIsLoaded(false);
+  } catch (err) {
+    console.error("Error deleting bookings:", err);
+  }
+}
+
+
   return (
     <div className="flex flex-col gap-6 p-6 bg-white shadow-md rounded-md">
       <h1 className="text-2xl font-semibold text-gray-800">Bookings</h1>
@@ -81,34 +64,43 @@ export default function Booking() {
               Check out Date
             </th>
             <th className="px-4 py-3 border border-gray-200 text-left">Note</th>
+            <th className="px-4 py-3 border border-gray-200 text-left">
+              Action
+            </th>
           </tr>
         </thead>
         <tbody className="text-gray-700">
-          {bookings.map((booking, index) => (
+          {bookings.map((item, index) => (
             <tr key={index} className="hover:bg-gray-50">
               <td className="px-4 py-3 border border-gray-200">
-                {booking.bookingId}
+                {item.bookingId}
               </td>
               <td className="px-4 py-3 border border-gray-200">
-                {booking.roomId}
+                {item.roomId}
+              </td>
+              <td className="px-4 py-3 border border-gray-200">{item.email}</td>
+              <td className="px-4 py-3 border border-gray-200">
+                {item.status}
               </td>
               <td className="px-4 py-3 border border-gray-200">
-                {booking.email}
+                {item.reason}
               </td>
               <td className="px-4 py-3 border border-gray-200">
-                {booking.status}
+                {item.startDate}
               </td>
               <td className="px-4 py-3 border border-gray-200">
-                {booking.reason}
+                {item.endDate}
               </td>
+              <td className="px-4 py-3 border border-gray-200">{item.notes}</td>
               <td className="px-4 py-3 border border-gray-200">
-                {booking.checkInDate}
-              </td>
-              <td className="px-4 py-3 border border-gray-200">
-                {booking.checkOutDate}
-              </td>
-              <td className="px-4 py-3 border border-gray-200">
-                {booking.note}
+                <button
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  onClick={() => {
+                    deleteItem(item.bookingId);
+                  }}
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
