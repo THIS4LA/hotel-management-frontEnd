@@ -1,4 +1,4 @@
-import { Route, Routes, Link, NavLink } from "react-router-dom";
+import { Outlet, NavLink } from "react-router-dom";
 import {
   FaClipboardList,
   FaUsers,
@@ -9,17 +9,12 @@ import {
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 
-import Booking from "./adminBooking.jsx";
-import Gallery from "./adminGallery.jsx";
-import Room from "./adminRoom.jsx";
-import User from "./adminUser.jsx";
-
 export default function Dashboard() {
   const menuItems = [
-    { icon: <FaClipboardList />, label: "Bookings", path: "/admin/bookings" },
-    { icon: <FaHotel />, label: "Rooms", path: "/admin/rooms" },
-    { icon: <FaUsers />, label: "Users", path: "/admin/users" },
-    { icon: <FaImages />, label: "Gallery", path: "/admin/gallery" }
+    { icon: <FaClipboardList />, label: "Bookings", path: "bookings" },
+    { icon: <FaHotel />, label: "Rooms", path: "rooms" },
+    { icon: <FaUsers />, label: "Users", path: "users" },
+    { icon: <FaImages />, label: "Gallery", path: "gallery" }
   ];
 
   return (
@@ -54,12 +49,7 @@ export default function Dashboard() {
 
       {/* Content Area */}
       <div className="w-[80%] h-screen bg-[#F8F9FA] p-6 overflow-y-scroll">
-        <Routes>
-          <Route path="/bookings" element={<Booking />} />
-          <Route path="/rooms" element={<Room />} />
-          <Route path="/users" element={<User />} />
-          <Route path="/gallery" element={<Gallery />} />
-        </Routes>
+        <Outlet />
       </div>
     </div>
   );
