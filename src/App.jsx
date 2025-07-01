@@ -1,14 +1,17 @@
 import { BrowserRouter, Route, Routes } from "react-router";
-import Home from "../src/pages/client/home.jsx";
-import Dashboard from "./pages/admin/dashboard.jsx";
+import ClientRoutes from "./routes/clientRoutes.jsx";
+import AdminRoutes from "./routes/adminRoutes.jsx";
 import Login from "./pages/authentication/login.jsx";
+
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes path="/">
-        <Route path="/user/*" element={<Home />} />
-        <Route path="/admin/*" element={<Dashboard />} />
+    <Toaster position="top-left" toastOptions={{ duration: 3000 }} />
+      <Routes>
+        <Route path="/*" element={<ClientRoutes />} />
+        <Route path="/admin/*" element={<AdminRoutes />} />
         <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>  

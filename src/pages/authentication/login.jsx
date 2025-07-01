@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from 'react-hot-toast';
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -9,7 +10,7 @@ export default function Login() {
 
   function handleLogin() {
     axios
-      .post(import.meta.env.VITE_BACKEND_URL+"/api/users/login", {
+      .post(import.meta.env.VITE_BACKEND_URL + "/api/users/login", {
         email: email,
         password: password,
       })
@@ -26,7 +27,11 @@ export default function Login() {
         }
       })
       .catch((err) => {
-        console.log(err);
+        if (err.response && err.response.data && err.response.data.message) {
+          toast.error(err.response.data.message);
+        } else {
+          toast.error(err.message);
+        }
       });
   }
   return (
