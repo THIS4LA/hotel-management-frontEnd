@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+import AddRoom from "./prompts/addRoom.jsx";
+
 export default function Room() {
   const [rooms, setRooms] = useState([]);
   const [showRoomList, setShowRoomList] = useState(false);
+  const [showAddPrompt, setShowAddPrompt] = useState(false);
 
   useEffect(() => {
     if (!showRoomList) {
@@ -35,7 +38,15 @@ export default function Room() {
 
   return (
     <div className="flex flex-col gap-6 p-6 bg-white shadow-md rounded-md">
-      <h1 className="text-2xl font-semibold text-gray-800">Rooms</h1>
+            <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold text-gray-800">Rooms</h1>
+        <button
+          className="bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-700"
+          onClick={() => setShowAddPrompt(true)}
+        >
+          Add Booking
+        </button>
+      </div>
 
       <table className="w-full table-auto border border-gray-200 rounded-md overflow-hidden">
         <thead className="bg-gray-100 text-gray-700">
@@ -110,6 +121,17 @@ export default function Room() {
           ))}
         </tbody>
       </table>
+      {showAddPrompt && (
+              <AddRoom
+                // onClose={() => {
+                //   setShowAddPrompt(false);
+                // }}
+                // onSubmit={() => {
+                //   setCategoryIsLoaded(false);
+                //   setShowAddPrompt(false);
+                // }}
+              />
+            )}
     </div>
   );
 }
