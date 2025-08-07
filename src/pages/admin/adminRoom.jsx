@@ -123,13 +123,13 @@ export default function Room() {
       </table>
       {showAddPrompt && (
               <AddRoom
-                // onClose={() => {
-                //   setShowAddPrompt(false);
-                // }}
-                // onSubmit={() => {
-                //   setCategoryIsLoaded(false);
-                //   setShowAddPrompt(false);
-                // }}
+                onClose={() => {
+                  setShowAddPrompt(false);
+                }}
+                onSubmit={() => {
+                  setShowRoomList(false);
+                  setShowAddPrompt(false);
+                }}
               />
             )}
     </div>

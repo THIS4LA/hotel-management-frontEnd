@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { ScaleLoader } from "react-spinners";
 import { IoCloudUpload } from "react-icons/io5";
 
-export default function AddRoom() {
+import axios from "axios";
+import { toast } from "react-hot-toast";
+
+export default function AddRoom({ onClose, onSubmit }) {
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState("");
   const [imgUploading, setImgUploading] = useState(false);
@@ -12,7 +15,7 @@ export default function AddRoom() {
     price: "",
     features: [],
     capacity: "",
-    isAvailable: true,
+    availability: true,
     image: "",
   });
 
@@ -37,6 +40,7 @@ export default function AddRoom() {
       const data = await res.json();
       console.log(data);
       setUrl(data.secure_url);
+      setFormData((prev) => ({ ...prev, image: data.secure_url }));
     } catch (err) {
       console.error("Upload error:", err);
     } finally {
@@ -57,6 +61,22 @@ export default function AddRoom() {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+
+    axios
+      .post(import.meta.env.VITE_BACKEND_URL + "/api/rooms", formData)
+      .then((res) => {
+        toast.success(res.data.message);
+        onSubmit();
+        onClose();
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      });
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -100,7 +120,7 @@ export default function AddRoom() {
           <textarea
             name="features"
             placeholder="Features(Optional)"
-            value={formData.features?.join(", ") || ""}
+            value={formData.features.join(", ")}
             onChange={handleChange}
             disabled={loading}
             className="border px-3 py-2 rounded w-full"
@@ -109,7 +129,7 @@ export default function AddRoom() {
 
           <input
             type="number"
-            name="Capacity"
+            name="capacity"
             placeholder="Capacity"
             value={formData.capacity}
             onChange={handleChange}
@@ -119,12 +139,12 @@ export default function AddRoom() {
           />
 
           <select
-            name="isAvailable"
-            value={formData.isAvailable ? "Yes" : "No"}
+            name="availability"
+            value={formData.availability ? "Yes" : "No"}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                isAvailable: e.target.value === "Yes",
+                availability: e.target.value === "Yes",
               })
             }
             className="border px-3 py-2 rounded w-full"
@@ -138,7 +158,7 @@ export default function AddRoom() {
               <div className="flex justify-center items-center h-full w-full">
                 <ScaleLoader color="#1E88E5" height={18} />
               </div>
-            ) : url ? (
+            ) : formData.image ? (
               <div className="relative">
                 <img
                   src={url}
@@ -147,7 +167,9 @@ export default function AddRoom() {
                 />
                 <button
                   type="button"
-                  onClick={() => setUrl("")}
+                  onClick={() => {
+                    setUrl(""), setFormData((prev) => ({ ...prev, image: "" }));
+                  }}
                   className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded"
                 >
                   ✕
@@ -177,15 +199,15 @@ export default function AddRoom() {
 
         <div className="flex justify-end gap-3 mt-6">
           <button
-            // onClick={onClose}
+            onClick={onClose}
             className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
           >
             Cancel
           </button>
           <button
-            // onClick={handleSubmit}
+            onClick={handleSubmit}
             className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center min-w-[120px]"
-            // disabled={loading}
+            disabled={loading}
           >
             {loading ? (
               <ScaleLoader color="#ffffff" height={18} />
