@@ -5,35 +5,47 @@ import EditBooking from "./prompts/editBooking.jsx";
 import { GoSortDesc } from "react-icons/go";
 import { MdDateRange } from "react-icons/md";
 import { RiArrowDropDownLine } from "react-icons/ri";
-import { toast } from "react-hot-toast";
-
 export default function Booking() {
   const [bookings, setBookings] = useState([]);
   const [item, setItem] = useState({});
-  const [categoryIsLoaded, setCategoryIsLoaded] = useState(false);
   const [showAddPrompt, setShowAddPrompt] = useState(false);
   const [showEditPrompt, setShowEditPrompt] = useState(false);
-
+  const [reloadTrigger, setReloadTrigger] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [dateRangeForm, setDateRangeForm] = useState({
+  const [datePickerValues, setDatePickerValues] = useState({
     startDate: "",
     endDate: "",
   });
 
+  const [filterArray, setFilterArray] = useState({
+    sortBy: "startDate",
+    startDate: "",
+    endDate: "",
+    page: "1",
+    limit: 10,
+    order: "asc",
+  });
+  const [totalPages, setTotalPages] = useState(0);
+
   useEffect(() => {
-    if (!categoryIsLoaded) {
-      axios
-        .get(import.meta.env.VITE_BACKEND_URL + "/api/book/")
-        .then((res) => {
-          setBookings(res.data.bookings);
-          setCategoryIsLoaded(true);
-        })
-        .catch((err) => {
-          console.error("Error fetching bookings:", err);
-        });
-    }
-  }, [categoryIsLoaded]);
+    axios
+      .get(import.meta.env.VITE_BACKEND_URL + "/api/book/", {
+        params: filterArray,
+      })
+      .then((res) => {
+        console.log("Bookings fetched successfully:", res.data);
+        console.log("Total docs:", res.totalDocs);
+        console.log("Limit per page:", res.limit);
+
+        setBookings(res.data.bookings);
+        setTotalPages(res.data.totalPages);
+      })
+      .catch((err) => {
+        console.error("Error fetching bookings:", err);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reloadTrigger]);
 
   async function deleteItem(bookingId) {
     const confirmDelete = window.confirm(
@@ -45,53 +57,27 @@ export default function Booking() {
       await axios.delete(
         import.meta.env.VITE_BACKEND_URL + "/api/book/" + bookingId
       );
-      setCategoryIsLoaded(false); // trigger re-fetch
+      setReloadTrigger((prev) => !prev);
     } catch (err) {
       console.error("Error deleting booking:", err);
     }
   }
 
-  async function handleSort(sortBy) {
-    try {
-      const response = await axios.get(
-        import.meta.env.VITE_BACKEND_URL + "/api/book",
-        {
-          params: { sortBy },
-          order: "asc",
-        }
-      );
-      setBookings(response.data.bookings);
-      toast.success(`Bookings sorted by ${sortBy}`);
-    } catch (err) {
-      toast.error("Error sorting bookings: " + err.message);
-    }
-  }
-
-  async function handleDateFilter() {
-    if (!dateRangeForm.startDate || !dateRangeForm.endDate) {
-      return toast.error("Please select both start and end dates.");
-    }
-    console.log("Filtering bookings from", dateRangeForm.startDate, "to", dateRangeForm.endDate);
-    try {
-      const response = await axios.get(
-        import.meta.env.VITE_BACKEND_URL + "/api/book/date",
-        {params: dateRangeForm}
-      );
-      setShowDatePicker(false);
-      setBookings(response.data.bookings);
-      toast.success(
-        `Get bookings from ${dateRangeForm.startDate} to ${dateRangeForm.endDate}`
-      );
-    } catch (err) {
-      toast.error("Error get bookings by given time range: " + err.message);
-      setShowDatePicker(false);
-    }
+  function applyDateFilter() {
+    setFilterArray((prevFilterArray) => ({
+      ...prevFilterArray,
+      startDate: datePickerValues.startDate,
+      endDate: datePickerValues.endDate,
+    }));
+    setReloadTrigger((prev) => !prev);
   }
 
   return (
     <div className="flex flex-col gap-6 p-6 bg-white rounded-md shadow-md">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-800">Bookings</h1>
+        <h1 className="text-2xl font-semibold text-gray-800">
+          Bookings
+        </h1>
 
         <button
           className="px-4 py-2 text-white bg-blue-400 rounded hover:bg-blue-700"
@@ -116,10 +102,10 @@ export default function Booking() {
             <input
               type="date"
               className="w-full mt-1 mb-3 px-2 py-1 border rounded text-sm"
-              value={dateRangeForm.startDate}
+              value={datePickerValues.startDate}
               onChange={(e) =>
-                setDateRangeForm({
-                  ...dateRangeForm,
+                setDatePickerValues({
+                  ...datePickerValues,
                   startDate: e.target.value,
                 })
               }
@@ -129,24 +115,34 @@ export default function Booking() {
             <input
               type="date"
               className="w-full mt-1 mb-3 px-2 py-1 border rounded text-sm"
-              value={dateRangeForm.endDate}
+              value={datePickerValues.endDate}
               onChange={(e) =>
-                setDateRangeForm({ ...dateRangeForm, endDate: e.target.value })
+                setDatePickerValues({
+                  ...datePickerValues,
+                  endDate: e.target.value,
+                })
               }
             />
 
             <div className="flex justify-between">
               <button
-                onClick={handleDateFilter}
+                onClick={() => {
+                  applyDateFilter();
+                  setShowDatePicker(false);
+                }}
                 className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-700 text-sm"
               >
                 Apply
               </button>
               <button
                 onClick={() => {
-                  // setStartDate("");
-                  // setEndDate("");
                   setShowDatePicker(false);
+                  setFilterArray((prev) => ({
+                    ...prev,
+                    startDate: "",
+                    endDate: "",
+                  }));
+                  setReloadTrigger((prev) => !prev);
                 }}
                 className="px-3 py-1 text-gray-600 border rounded hover:bg-gray-100 text-sm"
               >
@@ -167,23 +163,38 @@ export default function Booking() {
           <div className="absolute mt-11 w-40 bg-white border border-gray-200 rounded shadow-md z-10">
             <button
               onClick={() => {
-                setShowFilter(false), handleSort("startDate");
+                setFilterArray({
+                  ...filterArray,
+                  sortBy: "startDate",
+                });
+                setShowFilter(false);
+                setReloadTrigger((prev) => !prev);
               }}
               className="block w-full text-left px-4 py-2 hover:bg-gray-100"
             >
-              Sort by Date
+              Sort by CheckIn
             </button>
             <button
               onClick={() => {
-                setShowFilter(false), handleSort("endDate");
+                setFilterArray({
+                  ...filterArray,
+                  sortBy: "endDate",
+                });
+                setShowFilter(false);
+                setReloadTrigger((prev) => !prev);
               }}
               className="block w-full text-left px-4 py-2 hover:bg-gray-100"
             >
-              Sort by Name
+              Sort by CheckOut
             </button>
             <button
               onClick={() => {
-                setShowFilter(false), handleSort("roomId");
+                setFilterArray({
+                  ...filterArray,
+                  sortBy: "roomId",
+                });
+                setShowFilter(false);
+                setReloadTrigger((prev) => !prev);
               }}
               className="block w-full text-left px-4 py-2 hover:bg-gray-100"
             >
@@ -242,6 +253,24 @@ export default function Booking() {
           ))}
         </tbody>
       </table>
+      <div className="flex justify-start mt-4 gap-2">
+        {[...Array(totalPages)].map((_, index) => (
+          <button
+            key={index}
+            className={`px-3 py-1 rounded ${
+              Number(filterArray.page) === index + 1
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700"
+            }`}
+            onClick={() => {
+              setFilterArray((prev) => ({ ...prev, page: String(index + 1) }));
+              setReloadTrigger((prev) => !prev);
+            }}
+          >
+            {index + 1}
+          </button>
+        ))}
+      </div>
 
       {showAddPrompt && (
         <AddBooking
@@ -249,7 +278,7 @@ export default function Booking() {
             setShowAddPrompt(false);
           }}
           onSubmit={() => {
-            setCategoryIsLoaded(false);
+            setReloadTrigger((prev) => !prev);
             setShowAddPrompt(false);
           }}
         />
@@ -261,7 +290,7 @@ export default function Booking() {
             setShowEditPrompt(false);
           }}
           onSubmit={() => {
-            setCategoryIsLoaded(false);
+            setReloadTrigger((prev) => !prev);
             setShowEditPrompt(false);
           }}
         />
