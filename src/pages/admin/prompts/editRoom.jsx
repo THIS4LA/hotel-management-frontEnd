@@ -5,18 +5,18 @@ import { IoCloudUpload } from "react-icons/io5";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-export default function AddRoom({ onClose, onSubmit }) {
+export default function EditRoom({ onClose, onSubmit, room, roomId }) {
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState("");
   const [imgUploading, setImgUploading] = useState(false);
   const [formData, setFormData] = useState({
-    roomName: "",
-    category: "Standard",
-    price: "",
-    features: [],
-    capacity: "",
-    availability: true,
-    image: "",
+    roomName: room?.roomName || "",
+    category: room?.category || "Standard",
+    price: room?.price || "",
+    features: room?.features || [],
+    capacity: room?.capacity ||"",
+    availability: room?.availability || "",
+    image: room?.image || ""
   });
 
   async function handleImgChange(e) {
@@ -67,7 +67,7 @@ export default function AddRoom({ onClose, onSubmit }) {
     setLoading(true);
 
     axios
-      .post(import.meta.env.VITE_BACKEND_URL + "/api/rooms", formData)
+      .put(`${import.meta.env.VITE_BACKEND_URL}/api/rooms/${roomId}`, formData)
       .then((res) => {
         toast.success(res.data.message);
         onSubmit();
@@ -81,7 +81,7 @@ export default function AddRoom({ onClose, onSubmit }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-lg">
-        <h2 className="text-xl font-bold mb-4">Add New Room</h2>
+        <h2 className="text-xl font-bold mb-4">Edit Room</h2>
 
         <div className="grid grid-cols-1 gap-4">
           <input
@@ -161,7 +161,7 @@ export default function AddRoom({ onClose, onSubmit }) {
             ) : formData.image ? (
               <div className="relative">
                 <img
-                  src={url}
+                  src={url|| formData.image}
                   alt="Uploaded"
                   className="rounded w-full h-40 object-cover"
                 />
@@ -212,7 +212,7 @@ export default function AddRoom({ onClose, onSubmit }) {
             {loading ? (
               <ScaleLoader color="#ffffff" height={18} />
             ) : (
-              "Save Room"
+              "Update Room"
             )}
           </button>
         </div>
