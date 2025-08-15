@@ -5,14 +5,14 @@ import { IoCloudUpload } from "react-icons/io5";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-export default function AddGallery({ onClose, onSubmit }) {
+export default function EditGallery({ onClose, onSubmit, gallery ,galleryName }) {
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState("");
   const [imgUploading, setImgUploading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    img: "",
+    name: gallery?.name || "",
+    description: gallery?.description || "",
+    img: gallery?.img || "",
   });
 
   async function handleImgChange(e) {
@@ -53,7 +53,7 @@ export default function AddGallery({ onClose, onSubmit }) {
     setLoading(true);
 
     axios
-      .post(import.meta.env.VITE_BACKEND_URL + "/api/galleryItems", formData)
+      .put(`${import.meta.env.VITE_BACKEND_URL}/api/galleryItems/${galleryName}`, formData)
       .then((res) => {
         toast.success(res.data.message);
         onSubmit();
@@ -67,7 +67,7 @@ export default function AddGallery({ onClose, onSubmit }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-lg">
-        <h2 className="text-xl font-bold mb-4">Add Image</h2>
+        <h2 className="text-xl font-bold mb-4">Edit Gallery</h2>
 
         <div className="grid grid-cols-1 gap-4">
           <input
@@ -99,7 +99,7 @@ export default function AddGallery({ onClose, onSubmit }) {
             ) : formData.img ? (
               <div className="relative">
                 <img
-                  src={url}
+                  src={url || formData.img}
                   alt="Uploaded"
                   className="rounded w-full h-40 object-cover"
                 />
