@@ -10,14 +10,27 @@ export default function Gallery() {
   const [showAddPrompt, setShowAddPrompt] = useState(false);
   const [showEditPrompt, setShowEditPrompt] = useState(false);
   const [item, setItem] = useState({});
+    const [filterArray, setFilterArray] = useState({
+    sortBy: "name",
+    startDate: "",
+    endDate: "",
+    page: "1",
+    limit: 2,
+    order: "asc",
+  });
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
     axios
-      .get(import.meta.env.VITE_BACKEND_URL + "/api/galleryItems/")
+      .get(import.meta.env.VITE_BACKEND_URL + "/api/galleryItems/",{
+        params: filterArray,
+      })
       .then((res) => {
-        setGalleryItems(res.data.galleryItemList);
+        setGalleryItems(res.data.galleryItems);
         setLoadedGalleryList(true);
+        setTotalPages(res.data.totalPages);
       });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadedGalleryList]);
 
   async function deleteGalleryItem(name) {
@@ -100,6 +113,24 @@ export default function Gallery() {
           ))}
         </tbody>
       </table>
+            <div className="flex justify-start mt-4 gap-2">
+        {[...Array(totalPages)].map((_, index) => (
+          <button
+            key={index}
+            className={`px-3 py-1 rounded ${
+              Number(filterArray.page) === index + 1
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700"
+            }`}
+            onClick={() => {
+              setFilterArray((prev) => ({ ...prev, page: String(index + 1) }));
+              setLoadedGalleryList(false);
+            }}
+          >
+            {index + 1}
+          </button>
+        ))}
+      </div>
       {showAddPrompt && (
         <AddGallery
           onClose={() => setShowAddPrompt(false)}
