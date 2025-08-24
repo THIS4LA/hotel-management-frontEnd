@@ -254,7 +254,11 @@ export default function Room() {
               </td>
               <td className="px-4 py-3 border border-gray-200">{room.price}</td>
               <td className="px-4 py-3 border border-gray-200">
-                {room.features.join(", ")}
+                <ul className="list-disc list-inside">
+                  {room.features.map((feature, idx) => (
+                    <li key={idx}>{feature}</li>
+                  ))}
+                </ul>
               </td>
               <td className="px-4 py-3 border border-gray-200">
                 {room.capacity}
