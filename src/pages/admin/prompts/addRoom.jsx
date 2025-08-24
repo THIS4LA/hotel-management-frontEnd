@@ -17,6 +17,7 @@ export default function AddRoom({ onClose, onSubmit }) {
     capacity: "",
     availability: true,
     image: "",
+    featuresText: "",
   });
 
   async function handleImgChange(e) {
@@ -48,26 +49,40 @@ export default function AddRoom({ onClose, onSubmit }) {
     }
   }
 
-  const handleChange = (e) => {
+  const handleFeaturesChange = (e) => {
+    const featuresText = e.target.value;
+
+    // Support comma, newline, or semicolon as separators
+    const featuresArray = featuresText
+      .split(/[,;\n]+/) // split by comma, semicolon, or newline
+      .map((feature) => feature.trim())
+      .filter((feature) => feature !== "");
+
+    setFormData({
+      ...formData,
+      featuresText: featuresText,
+      features: featuresArray,
+    });
+  };
+
+  function handleChange(e) {
     const { name, value } = e.target;
 
-    if (name === "features") {
-      const featureArray = value
-        .split(",")
-        .map((item) => item.trim())
-        .filter((item) => item.length > 0);
-      setFormData((prev) => ({ ...prev, [name]: featureArray }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
+    // Exclude featuresText from submission
+    //eslint-disable-next-line
+    const { featuresText, ...dataToSubmit } = formData;
 
     axios
-      .post(import.meta.env.VITE_BACKEND_URL + "/api/rooms", formData)
+      .post(import.meta.env.VITE_BACKEND_URL + "/api/rooms", dataToSubmit)
       .then((res) => {
         toast.success(res.data.message);
         onSubmit();
@@ -119,13 +134,13 @@ export default function AddRoom({ onClose, onSubmit }) {
 
           <textarea
             name="features"
-            placeholder="Features(Optional)"
-            value={formData.features.join(", ")}
-            onChange={handleChange}
+            placeholder="Features (can be separated by commas, new lines, or semicolons)"
+            value={formData.featuresText}
+            onChange={handleFeaturesChange}
             disabled={loading}
             className="border px-3 py-2 rounded w-full"
             rows={3}
-          ></textarea>
+          />
 
           <input
             type="number"
