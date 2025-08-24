@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import ClientRoutes from "./routes/clientRoutes.jsx";
 import AdminRoutes from "./routes/adminRoutes.jsx";
 import Login from "./pages/authentication/login.jsx";
+import "./App.css";
 
 import { Toaster } from 'react-hot-toast';
 
