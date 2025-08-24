@@ -14,9 +14,10 @@ export default function EditRoom({ onClose, onSubmit, room, roomId }) {
     category: room?.category || "Standard",
     price: room?.price || "",
     features: room?.features || [],
-    capacity: room?.capacity ||"",
+    featuresText: room?.features?.join(", ") || "",
+    capacity: room?.capacity || "",
     availability: room?.availability || "",
-    image: room?.image || ""
+    image: room?.image || "",
   });
 
   async function handleImgChange(e) {
@@ -48,26 +49,40 @@ export default function EditRoom({ onClose, onSubmit, room, roomId }) {
     }
   }
 
-  const handleChange = (e) => {
+  const handleFeaturesChange = (e) => {
+    const featuresText = e.target.value;
+
+    // Support comma, newline, or semicolon as separators
+    const featuresArray = featuresText
+      .split(/[,;\n]+/) // split by comma, semicolon, or newline
+      .map((feature) => feature.trim())
+      .filter((feature) => feature !== "");
+
+    setFormData({
+      ...formData,
+      featuresText: featuresText,
+      features: featuresArray,
+    });
+  };
+
+  function handleChange(e) {
     const { name, value } = e.target;
 
-    if (name === "features") {
-      const featureArray = value
-        .split(",")
-        .map((item) => item.trim())
-        .filter((item) => item.length > 0);
-      setFormData((prev) => ({ ...prev, [name]: featureArray }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
 
+    //eslint-disable-next-line
+    const {featuresText, ...dataToSubmit } = formData;
+
     axios
-      .put(`${import.meta.env.VITE_BACKEND_URL}/api/rooms/${roomId}`, formData)
+      .put(`${import.meta.env.VITE_BACKEND_URL}/api/rooms/${roomId}`, dataToSubmit)
       .then((res) => {
         toast.success(res.data.message);
         onSubmit();
@@ -120,8 +135,8 @@ export default function EditRoom({ onClose, onSubmit, room, roomId }) {
           <textarea
             name="features"
             placeholder="Features(Optional)"
-            value={formData.features.join(", ")}
-            onChange={handleChange}
+            value={formData.featuresText}
+            onChange={handleFeaturesChange}
             disabled={loading}
             className="border px-3 py-2 rounded w-full"
             rows={3}
@@ -161,7 +176,7 @@ export default function EditRoom({ onClose, onSubmit, room, roomId }) {
             ) : formData.image ? (
               <div className="relative">
                 <img
-                  src={url|| formData.image}
+                  src={url || formData.image}
                   alt="Uploaded"
                   className="rounded w-full h-40 object-cover"
                 />
