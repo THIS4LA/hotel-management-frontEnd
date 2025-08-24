@@ -75,9 +75,7 @@ export default function Booking() {
   return (
     <div className="flex flex-col gap-6 p-6 bg-white rounded-md shadow-md">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Bookings
-        </h1>
+        <h1 className="text-2xl font-semibold text-gray-800">Bookings</h1>
 
         <button
           className="px-4 py-2 text-white bg-blue-400 rounded hover:bg-blue-700"
@@ -208,10 +206,9 @@ export default function Booking() {
         <thead className="text-gray-700 bg-gray-100">
           <tr>
             <th className="px-4 py-3 border">Booking ID</th>
-            <th className="px-4 py-3 border">Room ID</th>
-            <th className="px-4 py-3 border">Email</th>
+            <th className="px-4 py-3 border">Name</th>
+            <th className="px-4 py-3 border">Booked Rooms</th>
             <th className="px-4 py-3 border">Status</th>
-            <th className="px-4 py-3 border">Reason</th>
             <th className="px-4 py-3 border">Check in Date</th>
             <th className="px-4 py-3 border">Check out Date</th>
             <th className="px-4 py-3 border">Note</th>
@@ -223,10 +220,15 @@ export default function Booking() {
           {bookings.map((item, index) => (
             <tr key={index} className="hover:bg-gray-50">
               <td className="px-4 py-3 border">{item.bookingId}</td>
-              <td className="px-4 py-3 border">{item.roomId}</td>
-              <td className="px-4 py-3 border">{item.email}</td>
+              <td className="px-4 py-3 border">{item.name}</td>
+              <td className="px-4 py-3 border">
+                <ul className="list-disc pl-4">
+                  {item.rooms.map((r) => (
+                    <li key={r._id}>{r.roomName}</li>
+                  ))}
+                </ul>
+              </td>
               <td className="px-4 py-3 border">{item.status}</td>
-              <td className="px-4 py-3 border">{item.reason}</td>
               <td className="px-4 py-3 border">{item.startDate}</td>
               <td className="px-4 py-3 border">{item.endDate}</td>
               <td className="px-4 py-3 border">{item.notes}</td>
