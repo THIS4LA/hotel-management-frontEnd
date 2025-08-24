@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ScaleLoader } from "react-spinners";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { IoSearchOutline } from "react-icons/io5";
 
 export default function EditBooking({ onClose, onSubmit, booking }) {
   const formatDate = (dateStr) => {
@@ -11,8 +12,8 @@ export default function EditBooking({ onClose, onSubmit, booking }) {
   };
 
   const [formData, setFormData] = useState({
-    roomId: booking?.roomId || "",
-    customerName: booking?.customerName || "",
+    rooms: booking?.rooms || [],
+    name: booking?.name || "",
     email: booking?.email || "",
     status: booking?.status || "pending",
     reason: booking?.reason || "",
@@ -21,6 +22,71 @@ export default function EditBooking({ onClose, onSubmit, booking }) {
     notes: booking?.notes || "",
   });
   const [loading, setLoading] = useState(false);
+  const [roomFetchLoading, setRoomFetchLoading] = useState(false);
+  const [availableRooms, setAvailableRooms] = useState([]);
+
+  async function handleRoomFetch() {
+    if (!formData.startDate || !formData.endDate) {
+      toast.error("Please select both start and end dates.");
+      return;
+    }
+    if (formData.startDate > formData.endDate) {
+      toast.error("Start date cannot be after end date.");
+      return;
+    }
+    setRoomFetchLoading(true);
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_BACKEND_URL + "/api/book/available/",
+        {
+          params: {
+            startDate: formData.startDate,
+            endDate: formData.endDate,
+            currentBookingId: booking.bookingId, // to exclude current booking's rooms
+          },
+        }
+      );
+
+      const fetchedRooms = response.data.availableRooms;
+
+      if (fetchedRooms.length === 0) {
+        toast.error("No rooms available for the selected dates.");
+      } else {
+        // check which of the selected rooms are still available
+        const stillAvailable = formData.rooms.filter((r) =>
+          fetchedRooms.some((fr) => fr._id === r._id)
+        );
+
+        const removedRooms = formData.rooms.filter(
+          (r) => !fetchedRooms.some((fr) => fr._id === r._id)
+        );
+
+        if (removedRooms.length > 0) {
+          toast.error(
+            `Some rooms are not available for these dates and were removed: ${removedRooms
+              .map((r) => r.roomName)
+              .join(", ")}`
+          );
+        }
+
+        // update formData to only keep still available ones
+        setFormData((prev) => ({
+          ...prev,
+          rooms: stillAvailable,
+        }));
+
+        // update the available rooms list
+        setAvailableRooms(fetchedRooms);
+
+        toast.success("Available rooms fetched successfully.");
+      }
+    } catch (error) {
+      toast.error("Error fetching available rooms: " + error.message);
+    }
+    finally {
+      setRoomFetchLoading(false);
+    }
+  }
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -30,10 +96,12 @@ export default function EditBooking({ onClose, onSubmit, booking }) {
   function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
+    //eslint-disable-next-line
+    const { roomNamesText, ...dataToSubmit } = formData;
     axios
       .put(
         import.meta.env.VITE_BACKEND_URL + "/api/book/" + booking.bookingId,
-        formData
+        dataToSubmit
       )
       .then((res) => {
         toast.success(res.data.message);
@@ -54,10 +122,9 @@ export default function EditBooking({ onClose, onSubmit, booking }) {
 
         <div className="grid grid-cols-1 gap-4">
           <input
-            type="text"
-            name="roomId"
-            placeholder="Room ID"
-            value={formData.roomId}
+            type="date"
+            name="startDate"
+            value={formData.startDate}
             onChange={handleChange}
             disabled={loading}
             className="border px-3 py-2 rounded w-full"
@@ -65,14 +132,89 @@ export default function EditBooking({ onClose, onSubmit, booking }) {
           />
 
           <input
-            type="email"
+            type="date"
+            name="endDate"
+            value={formData.endDate}
+            onChange={handleChange}
+            disabled={loading}
+            className="border px-3 py-2 rounded w-full"
+            required
+          />
+          <button
+            onClick={handleRoomFetch}
+            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center min-w-[120px] gap-2"
+            disabled={loading}
+          >
+            {roomFetchLoading ? (
+              <ScaleLoader color="#ffffff" height={18} />
+            ) : (
+              <>
+                Search Available Rooms <IoSearchOutline />
+              </>
+            )}
+          </button>
+          <div
+            className="overflow-y-auto border rounded p-2"
+            style={{ maxHeight: "12rem" }}
+          >
+            {[...formData.rooms, ...availableRooms]
+              // remove duplicates (in case a booked room is also in availableRooms)
+              .filter(
+                (room, index, self) =>
+                  index === self.findIndex((r) => r._id === room._id)
+              )
+              .map((room) => {
+                //in here we check if the room is already selected
+                const isSelected = formData.rooms.some(
+                  (r) => r._id === room._id
+                );
+
+                const handleToggleRoom = () => {
+                  if (isSelected) {
+                    setFormData({
+                      ...formData,
+                      //in here we remove the room from selectedRooms
+                      rooms: formData.rooms.filter((r) => r._id !== room._id),
+                    });
+                  } else {
+                    //in here we add the room to selectedRooms
+                    setFormData({
+                      ...formData,
+                      rooms: [...formData.rooms, room],
+                    });
+                  }
+                };
+
+                return (
+                  <div
+                    key={room._id}
+                    className={`flex items-center cursor-pointer p-2 border-b last:border-b-0 rounded ${
+                      isSelected ? "bg-blue-50" : "border-gray-200"
+                    }`}
+                    onClick={handleToggleRoom}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      readOnly
+                      className="mr-2 cursor-pointer"
+                    />
+                    <span className="truncate">
+                      {room.roomName} | {room.category} | ${room.price}
+                    </span>
+                  </div>
+                );
+              })}
+          </div>
+
+          <input
+            type="text"
             name="email"
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
             disabled={loading}
             className="border px-3 py-2 rounded w-full"
-            required
           />
 
           <select
@@ -95,26 +237,6 @@ export default function EditBooking({ onClose, onSubmit, booking }) {
             onChange={handleChange}
             disabled={loading}
             className="border px-3 py-2 rounded w-full"
-          />
-
-          <input
-            type="date"
-            name="startDate"
-            value={formData.startDate}
-            onChange={handleChange}
-            disabled={loading}
-            className="border px-3 py-2 rounded w-full"
-            required
-          />
-
-          <input
-            type="date"
-            name="endDate"
-            value={formData.endDate}
-            onChange={handleChange}
-            disabled={loading}
-            className="border px-3 py-2 rounded w-full"
-            required
           />
 
           <textarea
