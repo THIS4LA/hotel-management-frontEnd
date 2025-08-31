@@ -9,5 +9,12 @@
 body {
   font-family: "Plus Jakarta Sans", sans-serif;
   font-optical-sizing: auto;
-  font-weight: 4
+  font-weight: 4;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+}
+
+::-webkit-scrollbar {
+  display: none;
 }
