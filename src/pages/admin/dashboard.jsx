@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 
+
 export default function Dashboard() {
   const menuItems = [
     { icon: <FaClipboardList />, label: "Bookings", path: "bookings" },

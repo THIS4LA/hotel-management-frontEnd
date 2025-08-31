@@ -1,12 +1,17 @@
-import { useState } from "react";
+import Footer from "../../components/footer";
 import Header from "../../components/header";
+import About from "./about";
+import Contact from "./contact";
+import Hero from "./hero";
+import Rooms from "./rooms";
 
 export default function Home() {
-  const [num, setNum] = useState(0);
-
   return (
-    <div className="w-full h-[100vh] bg-slate-600 flex justify-center gap-10">
-      <Header />
-    </div>
+    <>
+      <Hero />
+      <About/>
+      <Rooms/>
+      <Contact />
+    </>
   );
 }
