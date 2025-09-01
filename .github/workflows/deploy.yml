@@ -20,10 +20,10 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build project
-        run: npm run build
+        run: npx vite build
         env:
           VITE_API_KEY: ${{ secrets.VITE_API_KEY }}
           VITE_API_SECRET: ${{ secrets.VITE_API_SECRET }}
