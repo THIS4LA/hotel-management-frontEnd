@@ -24,6 +24,12 @@ jobs:
 
       - name: Build project
         run: npm run build
+        env:
+          VITE_API_KEY: ${{ secrets.VITE_API_KEY }}
+          VITE_API_SECRET: ${{ secrets.VITE_API_SECRET }}
+          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
+          VITE_CLOUD_NAME: ${{ secrets.VITE_CLOUD_NAME }}
+          VITE_UPLOAD_PRESET: ${{ secrets.VITE_UPLOAD_PRESET }}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
