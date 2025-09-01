@@ -4,7 +4,7 @@ import UserData from "./userData";
 import { RiMenu3Fill } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
 import { useState } from "react";
-import logo from "../assets/logo.png";
+import logo from '../../public/logo.png';
 import { useLocation } from "react-router-dom";
 
 function Header() {
