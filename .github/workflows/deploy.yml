@@ -1,6 +1,7 @@
 name: hotel-management-frontEnd
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
